@@ -1,7 +1,7 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using ABCRetailers.Models;
 
-namespace ABCRetailers.Models.ViewModels
+namespace ABCRetailers.ViewModels
 {
     public class OrderCreateViewModel
     {
@@ -27,7 +27,7 @@ namespace ABCRetailers.Models.ViewModels
         [Display(Name = "Status")]
         public string Status { get; set; } = "Submitted";
 
-        public List<Customer> Customers { get; set; } = new List<Customer>();
-        public List<Product> Products { get; set; } = new List<Product>();
+        public List<Customers> Customers { get; set; } = new List<Customers>();
+        public List<Products> Products { get; set; } = new List<Products>();
     }
 }

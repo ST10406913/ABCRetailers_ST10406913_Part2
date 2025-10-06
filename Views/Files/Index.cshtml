@@ -1,0 +1,163 @@
+﻿<!-- Views/Files/Index.cshtml -->
+@{
+    ViewData["Title"] = "File Management";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="text-center mb-5">
+            <h1><i class="fas fa-file-alt me-2"></i>@ViewData["Title"]</h1>
+            <p class="lead">Manage your files across Azure Blob Storage and Azure File Storage</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Upload Card -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Upload Files</h5>
+                <p class="card-text">Upload files to Azure Blob Storage or Azure File Storage with easy drag & drop interface.</p>
+                <a asp-action="Upload" class="btn btn-primary">
+                    <i class="fas fa-upload me-1"></i> Upload Files
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Files Card -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-folder-open fa-3x text-success mb-3"></i>
+                <h5 class="card-title">View All Files</h5>
+                <p class="card-text">Browse and manage all uploaded files across both storage services in one convenient location.</p>
+                <a asp-action="List" class="btn btn-success">
+                    <i class="fas fa-list me-1"></i> View Files
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Storage Info Card -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-info-circle fa-3x text-info mb-3"></i>
+                <h5 class="card-title">Storage Information</h5>
+                <p class="card-text">Learn about the different storage options and when to use each service for optimal performance.</p>
+                <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#storageInfoModal">
+                    <i class="fas fa-info me-1"></i> Learn More
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Quick Access</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="p-3">
+                            <i class="fas fa-database fa-2x text-primary mb-2"></i>
+                            <h5>Blob Storage</h5>
+                            <p class="text-muted">For images, documents, and unstructured data</p>
+                            <a asp-action="List" class="btn btn-outline-primary btn-sm">
+                                Access Blob Storage
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3">
+                            <i class="fas fa-folder fa-2x text-success mb-2"></i>
+                            <h5>File Storage</h5>
+                            <p class="text-muted">For file shares and traditional file systems</p>
+                            <a asp-action="List" class="btn btn-outline-success btn-sm">
+                                Access File Storage
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3">
+                            <i class="fas fa-images fa-2x text-warning mb-2"></i>
+                            <h5>Product Images</h5>
+                            <p class="text-muted">Manage product images and media files</p>
+                            <a asp-controller="Products" asp-action="Index" class="btn btn-outline-warning btn-sm">
+                                View Products
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3">
+                            <i class="fas fa-file-pdf fa-2x text-danger mb-2"></i>
+                            <h5>Documents</h5>
+                            <p class="text-muted">Store and manage business documents</p>
+                            <a asp-action="Upload" class="btn btn-outline-danger btn-sm">
+                                Upload Documents
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Storage Info Modal -->
+<div class="modal fade" id="storageInfoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-info-circle me-2"></i>Storage Services Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0"><i class="fas fa-database me-2"></i>Azure Blob Storage</h6>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-2"></i> Optimized for massive amounts of unstructured data</li>
+                                    <li><i class="fas fa-check text-success me-2"></i> Perfect for images, documents, and backups</li>
+                                    <li><i class="fas fa-check text-success me-2"></i> Scalable and cost-effective</li>
+                                    <li><i class="fas fa-check text-success me-2"></i> REST-based object storage</li>
+                                </ul>
+                                <p class="text-muted small">Use for: Product images, customer documents, backups</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0"><i class="fas fa-folder me-2"></i>Azure File Storage</h6>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-2"></i> Fully managed file shares</li>
+                                    <li><i class="fas fa-check text-success me-2"></i> SMB and NFS protocols</li>
+                                    <li><i class="fas fa-check text-success me-2"></i> Traditional file system structure</li>
+                                    <li><i class="fas fa-check text-success me-2"></i> Easy lift-and-shift scenarios</li>
+                                </ul>
+                                <p class="text-muted small">Use for: Shared documents, application data, legacy apps</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

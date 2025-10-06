@@ -1,3 +1,4 @@
+// Models/ErrorViewModel.cs
 namespace ABCRetailers.Models
 {
     public class ErrorViewModel

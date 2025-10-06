@@ -1,0 +1,88 @@
+﻿<!-- Views/Products/Details.cshtml -->
+@model ABCRetailers.Models.Products
+@{
+    ViewData["Title"] = "Product Details";
+}
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="fas fa-box me-2"></i>@ViewData["Title"]</h4>
+            </div>
+            <div class="card-body">
+                <!-- Simple layout without any complex logic -->
+                <div class="row">
+                    <div class="col-md-4 text-center mb-4">
+                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                        {
+                            <img src="@Model.ImageUrl" class="product-detail-image" alt="@Model.Name">
+                        }
+                        else
+                        {
+                            <div class="text-muted">
+                                <i class="fas fa-image fa-3x mb-2"></i>
+                                <div>No Image</div>
+                            </div>
+                        }
+                    </div>
+                    <div class="col-md-8">
+                        <dl class="row">
+                            <dt class="col-sm-4">Product Name</dt>
+                            <dd class="col-sm-8 fw-bold fs-5">@Model.Name</dd>
+
+                            <dt class="col-sm-4">Description</dt>
+                            <dd class="col-sm-8">@Model.Description</dd>
+
+                            <dt class="col-sm-4">Category</dt>
+                            <dd class="col-sm-8">
+                                <span class="badge bg-primary">@Model.Category</span>
+                            </dd>
+
+                            <dt class="col-sm-4">Price</dt>
+                            <dd class="col-sm-8 fs-5 text-success">@Model.Price.ToString("C")</dd>
+
+                            <dt class="col-sm-4">Stock Quantity</dt>
+                            <dd class="col-sm-8">
+                                @{
+                                    var badgeClass = Model.StockQuantity > 10 ? "bg-success" : "bg-warning";
+                                }
+                                <span class="badge @badgeClass fs-6">
+                                    @Model.StockQuantity units
+                                </span>
+                            </dd>
+
+                            <dt class="col-sm-4">Created Date</dt>
+                            <dd class="col-sm-8">@Model.CreatedDate.ToString("MMMM dd, yyyy")</dd>
+
+                            <dt class="col-sm-4">Product ID</dt>
+                            <dd class="col-sm-8"><code>@Model.RowKey</code></dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <a asp-action="Index" class="btn btn-secondary me-md-2">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                    <a asp-action="Edit" asp-route-partitionKey="@Model.PartitionKey" asp-route-rowKey="@Model.RowKey" class="btn btn-warning me-md-2">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a asp-action="Delete" asp-route-partitionKey="@Model.PartitionKey" asp-route-rowKey="@Model.RowKey" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .product-detail-image {
+        width: 200px;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #dee2e6;
+    }
+</style>

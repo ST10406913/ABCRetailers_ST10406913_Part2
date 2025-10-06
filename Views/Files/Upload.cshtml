@@ -1,0 +1,118 @@
+﻿<!-- Views/Files/Upload.cshtml -->
+@model FileUploadModel
+@{
+    ViewData["Title"] = "Upload Files";
+}
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="fas fa-cloud-upload-alt me-2"></i>@ViewData["Title"]</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Upload" method="post" enctype="multipart/form-data" id="uploadForm">
+                    <div class="mb-3">
+                        <label class="form-label">Storage Type</label>
+                        <select asp-for="StorageType" class="form-select" required>
+                            <option value="blob">Azure Blob Storage</option>
+                            <option value="file">Azure File Storage</option>
+                        </select>
+                        <span asp-validation-for="StorageType" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label"></label>
+                        <input asp-for="Description" class="form-control" placeholder="Enter file description...">
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="File" class="form-label"></label>
+                        <div class="file-upload-area" id="fileUploadArea">
+                            <input type="file" asp-for="File" class="d-none" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx">
+                            <div class="text-center">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                <h5 class="upload-label">Click to select or drag and drop</h5>
+                                <p class="text-muted">Supported formats: JPG, PNG, GIF, PDF, DOC, DOCX (Max 10MB)</p>
+                            </div>
+                            <img class="file-preview mt-3 d-none" id="filePreview">
+                        </div>
+                        <span asp-validation-for="File" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-upload me-2"></i>Upload File
+                        </button>
+                    </div>
+                </form>
+
+                @if (TempData["FileUrl"] != null)
+                {
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <h6>File Uploaded Successfully!</h6>
+                        <p class="mb-2">File URL:</p>
+                        <code class="d-block p-2 bg-white rounded">@TempData["FileUrl"]</code>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // File upload preview functionality
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const fileInput = fileUploadArea.querySelector('input[type="file"]');
+            const filePreview = document.getElementById('filePreview');
+            const uploadLabel = fileUploadArea.querySelector('.upload-label');
+
+            fileUploadArea.addEventListener('click', () => fileInput.click());
+
+            fileInput.addEventListener('change', function (e) {
+                if (e.target.files.length) {
+                    const file = e.target.files[0];
+                    uploadLabel.textContent = file.name;
+
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            filePreview.src = e.target.result;
+                            filePreview.classList.remove('d-none');
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        filePreview.classList.add('d-none');
+                    }
+                }
+            });
+
+            // Drag and drop functionality
+            ['dragover', 'dragenter'].forEach(event => {
+                fileUploadArea.addEventListener(event, (e) => {
+                    e.preventDefault();
+                    fileUploadArea.classList.add('dragover');
+                });
+            });
+
+            ['dragleave', 'dragend'].forEach(event => {
+                fileUploadArea.addEventListener(event, () => {
+                    fileUploadArea.classList.remove('dragover');
+                });
+            });
+
+            fileUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.remove('dragover');
+
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    fileInput.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+    </script>
+}

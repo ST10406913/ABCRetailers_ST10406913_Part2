@@ -1,0 +1,121 @@
+﻿<!-- Views/Orders/Details.cshtml -->
+@model Orders
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="fas fa-receipt me-2"></i>@ViewData["Title"]</h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Customer Information</h6>
+                        <div class="fw-bold">@Model.CustomerName</div>
+                        <div class="text-muted">Customer ID: @Model.CustomerId</div>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <h6 class="text-muted">Order Information</h6>
+                        <div class="fw-bold">Order #@Model.RowKey.Substring(0, 8)</div>
+                        <div class="text-muted">Placed: @Model.OrderDate.ToString("MMMM dd, yyyy")</div>
+                    </div>
+                </div>
+
+                <div class="border rounded p-3 mb-4">
+                    <h6 class="text-muted mb-3">Product Details</h6>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold">@Model.ProductName</div>
+                            <div class="text-muted">Product ID: @Model.ProductId</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold">@Model.Quantity x @((Model.TotalPrice / Model.Quantity).ToString("C"))</div>
+                            <div class="text-success fs-5">@Model.TotalPrice.ToString("C")</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-4">Status</dt>
+                            <dd class="col-sm-8">
+                                <span class="badge status-@Model.Status.ToLower()">@Model.Status</span>
+                            </dd>
+
+                            <dt class="col-sm-4">Order Date</dt>
+                            <dd class="col-sm-8">@Model.OrderDate.ToString("MMMM dd, yyyy")</dd>
+
+                            @if (Model.ShippedDate.HasValue)
+                            {
+                                <dt class="col-sm-4">Shipped Date</dt>
+                                <dd class="col-sm-8">@Model.ShippedDate.Value.ToString("MMMM dd, yyyy")</dd>
+                            }
+
+                            @if (Model.DeliveredDate.HasValue)
+                            {
+                                <dt class="col-sm-4">Delivered Date</dt>
+                                <dd class="col-sm-8">@Model.DeliveredDate.Value.ToString("MMMM dd, yyyy")</dd>
+                            }
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-4">Quantity</dt>
+                            <dd class="col-sm-8">@Model.Quantity</dd>
+
+                            <dt class="col-sm-4">Unit Price</dt>
+                            <dd class="col-sm-8">@((Model.TotalPrice / Model.Quantity).ToString("C"))</dd>
+
+                            <dt class="col-sm-4">Total Amount</dt>
+                            <dd class="col-sm-8 fw-bold text-success">@Model.TotalPrice.ToString("C")</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <a asp-action="Index" class="btn btn-secondary me-md-2">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                    <div class="dropdown">
+                        <button class="btn btn-warning dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-sync"></i> Update Status
+                        </button>
+                        <ul class="dropdown-menu">
+                            @if (Model.Status != "Confirmed")
+                            {
+                                <li>
+                                    <a class="dropdown-item status-update-btn" href="#"
+                                       data-partition-key="@Model.PartitionKey" data-row-key="@Model.RowKey" data-status="Confirmed">
+                                        Mark as Confirmed
+                                    </a>
+                                </li>
+                            }
+                            @if (Model.Status != "Shipped")
+                            {
+                                <li>
+                                    <a class="dropdown-item status-update-btn" href="#"
+                                       data-partition-key="@Model.PartitionKey" data-row-key="@Model.RowKey" data-status="Shipped">
+                                        Mark as Shipped
+                                    </a>
+                                </li>
+                            }
+                            @if (Model.Status != "Delivered")
+                            {
+                                <li>
+                                    <a class="dropdown-item status-update-btn" href="#"
+                                       data-partition-key="@Model.PartitionKey" data-row-key="@Model.RowKey" data-status="Delivered">
+                                        Mark as Delivered
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

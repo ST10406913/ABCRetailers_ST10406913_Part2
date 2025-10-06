@@ -1,18 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http;
 
 namespace ABCRetailers.Models
 {
     public class FileUploadModel
     {
-        [Required]
-        [Display(Name = "Proof of Payment")]
-        public IFormFile ProofOfPayment { get; set; }
+        [Required(ErrorMessage = "Please select a file")]
+        public required IFormFile File { get; set; }
 
-        [Display(Name = "Order ID")]
-        public string? OrderId { get; set; }
+        public required string Description { get; set; }
 
-        [Display(Name = "Customer Name")]
-        public string? CustomerName { get; set; }
+        [Required(ErrorMessage = "Please select storage type")]
+        public string StorageType { get; set; } = "blob"; // "blob" or "file"
     }
 }

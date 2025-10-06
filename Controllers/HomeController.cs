@@ -1,27 +1,73 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System.Diagnostics;
-using System.Threading.Tasks;
+﻿// Controllers/HomeController.cs
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using ABCRetailers.Models;
-using ABCRetailers.Services;
+using ABCRetailers.Services.Interfaces;
+using ABCRetailers.ViewModels;
 
 namespace ABCRetailers.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly ITableStorageService<Customers> _customerService;
+        private readonly ITableStorageService<Products> _productService;
+        private readonly ITableStorageService<Orders> _orderService;
         private readonly ILogger<HomeController> _logger;
-        private readonly IAzureStorageService _azureStorageService;
 
-        public HomeController(ILogger<HomeController> logger, IAzureStorageService azureStorageService)
+        public HomeController(
+            ITableStorageService<Customers> customerService,
+            ITableStorageService<Products> productService,
+            ITableStorageService<Orders> orderService,
+            ILogger<HomeController> logger)
         {
+            _customerService = customerService;
+            _productService = productService;
+            _orderService = orderService;
             _logger = logger;
-            _azureStorageService = azureStorageService;
         }
 
         public async Task<IActionResult> Index()
         {
-            await _azureStorageService.InitializeStorageAsync();
-            return View();
+            try
+            {
+                var dashboard = new HomeViewModel();
+
+                // Get counts for dashboard cards
+                var customers = await _customerService.GetAllEntitiesAsync("Customers");
+                var products = await _productService.GetAllEntitiesAsync("Products");
+                var orders = await _orderService.GetAllEntitiesAsync("Orders");
+
+                dashboard.TotalCustomers = customers.Count();
+                dashboard.TotalProducts = products.Count();
+                dashboard.TotalOrders = orders.Count();
+                dashboard.TotalRevenue = orders.Sum(o => o.TotalPrice);
+
+                // Get recent orders for the table
+                dashboard.RecentOrders = orders
+                    .OrderByDescending(o => o.OrderDate)
+                    .Take(5)
+                    .ToList();
+
+                // Get order status distribution
+                dashboard.OrderStatusCounts = orders
+                    .GroupBy(o => o.Status)
+                    .ToDictionary(g => g.Key, g => g.Count());
+
+                // Get low stock products
+                dashboard.LowStockProducts = products
+                    .Where(p => p.StockQuantity < 10)
+                    .OrderBy(p => p.StockQuantity)
+                    .Take(5)
+                    .ToList();
+
+                return View(dashboard);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading dashboard");
+                // Return empty dashboard on error
+                return View(new HomeViewModel());
+            }
         }
 
         public IActionResult Privacy()
@@ -32,7 +78,7 @@ namespace ABCRetailers.Controllers
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View(new ErrorViewModel { RequestId = System.Diagnostics.Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }
