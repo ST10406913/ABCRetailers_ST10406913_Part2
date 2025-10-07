@@ -1,5 +1,4 @@
-﻿// Controllers/ProductsController.cs
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using ABCRetailers.Models;
 using ABCRetailers.Services.Interfaces;
@@ -37,12 +36,12 @@ namespace ABCRetailers.Controllers
 
                 if (!string.IsNullOrEmpty(searchString))
                 {
-                    products = await _productService.SearchEntitiesAsync(searchString, "Products");
+                    products = await _productService.SearchEntitiesAsync(searchString);
                     ViewData["SearchResults"] = $"{products.Count()} products found for \"{searchString}\"";
                 }
                 else
                 {
-                    products = await _productService.GetAllEntitiesAsync("Products");
+                    products = await _productService.GetAllEntitiesAsync();
                 }
 
                 // Apply category filter if selected
@@ -99,14 +98,15 @@ namespace ABCRetailers.Controllers
         // POST: Products/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Description,Price,Category,StockQuantity")] Products product, IFormFile imageFile)
+        public async Task<IActionResult> Create(Products product, IFormFile imageFile)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    product.PartitionKey = "Products";
+                    product.PartitionKey = "Product";
                     product.RowKey = Guid.NewGuid().ToString();
+                    product.CreatedDate = DateTime.UtcNow;
 
                     // Handle image upload
                     if (imageFile != null && imageFile.Length > 0)
@@ -162,25 +162,37 @@ namespace ABCRetailers.Controllers
             }
         }
 
-        // POST: Products/Edit/5
+        // POST: Products/Edit/5 - FIXED VERSION
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string partitionKey, string rowKey, [Bind("PartitionKey,RowKey,Name,Description,Price,Category,StockQuantity,ImageUrl,CreatedDate")] Products product, IFormFile imageFile)
+        public async Task<IActionResult> Edit(string partitionKey, string rowKey, Products product, IFormFile imageFile)
         {
             try
             {
-                if (partitionKey != product.PartitionKey || rowKey != product.RowKey)
-                {
-                    return NotFound();
-                }
-
+                // FIXED: Remove the partitionKey/rowKey check that was causing issues
                 if (ModelState.IsValid)
                 {
+                    // Get the existing product to preserve some fields
+                    var existingProduct = await _productService.GetEntityAsync(product.PartitionKey, product.RowKey);
+                    if (existingProduct == null)
+                    {
+                        TempData["ErrorMessage"] = "Product not found.";
+                        return RedirectToAction(nameof(Index));
+                    }
+
+                    // Preserve the created date
+                    product.CreatedDate = existingProduct.CreatedDate;
+
                     // Handle image upload if new file provided
                     if (imageFile != null && imageFile.Length > 0)
                     {
                         var imageUrl = await _blobService.UploadFileAsync(imageFile, _settings.BlobContainerNames.ProductImages);
                         product.ImageUrl = imageUrl;
+                    }
+                    else
+                    {
+                        // Keep existing image if no new file uploaded
+                        product.ImageUrl = existingProduct.ImageUrl;
                     }
 
                     var success = await _productService.UpdateEntityAsync(product);
@@ -194,6 +206,8 @@ namespace ABCRetailers.Controllers
                         TempData["ErrorMessage"] = "Failed to update product. Please try again.";
                     }
                 }
+
+                // If we got this far, something failed; redisplay form
                 return View(product);
             }
             catch (Exception ex)

@@ -1,5 +1,4 @@
-﻿<!-- Views/Products/Edit.cshtml -->
-@model Products
+﻿@model Products
 @{
     ViewData["Title"] = "Edit Product";
 }
@@ -18,54 +17,76 @@
                     <input type="hidden" asp-for="CreatedDate" />
 
                     <div class="form-group mb-3">
-                        <label asp-for="Name" class="form-label"></label>
-                        <input asp-for="Name" class="form-control" />
+                        <label asp-for="Name" class="form-label">Product Name</label>
+                        <input asp-for="Name" class="form-control" placeholder="Enter product name" />
                         <span asp-validation-for="Name" class="text-danger"></span>
                     </div>
 
                     <div class="form-group mb-3">
-                        <label asp-for="Description" class="form-label"></label>
-                        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                        <label asp-for="Description" class="form-label">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="3" placeholder="Enter product description"></textarea>
                         <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-3">
-                                <label asp-for="Price" class="form-label"></label>
+                                <label asp-for="Price" class="form-label">Price (R)</label>
                                 <div class="input-group">
-                                    <span class="input-group-text">$</span>
-                                    <input asp-for="Price" class="form-control" type="number" step="0.01" />
+                                    <span class="input-group-text">R</span>
+                                    <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" placeholder="0.00" />
                                 </div>
                                 <span asp-validation-for="Price" class="text-danger"></span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-3">
-                                <label asp-for="StockQuantity" class="form-label"></label>
-                                <input asp-for="StockQuantity" class="form-control" type="number" />
+                                <label asp-for="StockQuantity" class="form-label">Stock Quantity</label>
+                                <input asp-for="StockQuantity" class="form-control" type="number" min="0" placeholder="0" />
                                 <span asp-validation-for="StockQuantity" class="text-danger"></span>
                             </div>
                         </div>
                     </div>
 
                     <div class="form-group mb-3">
-                        <label asp-for="Category" class="form-label"></label>
-                        <input asp-for="Category" class="form-control" />
+                        <label asp-for="Category" class="form-label">Category</label>
+                        <select asp-for="Category" class="form-select">
+                            <option value="">Select Category</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Clothing">Clothing</option>
+                            <option value="Footwear">Footwear</option>
+                            <option value="Accessories">Accessories</option>
+                            <option value="Home & Kitchen">Home & Kitchen</option>
+                            <option value="Beauty">Beauty</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Books">Books</option>
+                        </select>
                         <span asp-validation-for="Category" class="text-danger"></span>
                     </div>
 
+                    <!-- Current Image Display -->
+                    <div class="form-group mb-3">
+                        <label class="form-label">Current Image</label>
+                        <div>
+                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                            {
+                                <img src="@Model.ImageUrl" class="img-thumbnail" style="max-height: 200px;" alt="@Model.Name" />
+                                <div class="form-text mt-1">Current product image</div>
+                            }
+                            else
+                            {
+                                <div class="text-muted">
+                                    <i class="fas fa-image me-2"></i>No image uploaded
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- New Image Upload -->
                     <div class="form-group mb-4">
-                        <label class="form-label">Product Image</label>
-                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
-                        {
-                            <div class="mb-2">
-                                <img src="@Model.ImageUrl" class="product-image-preview" alt="Current image">
-                                <div class="form-text">Current product image</div>
-                            </div>
-                        }
+                        <label class="form-label">Update Product Image</label>
                         <input type="file" name="imageFile" class="form-control" accept=".jpg,.jpeg,.png,.gif" />
-                        <small class="text-muted">Leave empty to keep current image</small>
+                        <div class="form-text">Supported formats: JPG, PNG, GIF (Max 10MB). Leave empty to keep current image.</div>
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
@@ -81,16 +102,6 @@
         </div>
     </div>
 </div>
-
-<style>
-    .product-image-preview {
-        width: 100px;
-        height: 100px;
-        object-fit: cover;
-        border-radius: 8px;
-        border: 1px solid #dee2e6;
-    }
-</style>
 
 @section Scripts {
     @{

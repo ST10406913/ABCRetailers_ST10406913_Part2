@@ -16,6 +16,10 @@ builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<IQueueStorageService, QueueStorageService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 
+// FIXED: Remove these if they don't exist - they might be causing conflicts
+// builder.Services.AddScoped<IOrdersService, OrdersService>();
+// builder.Services.AddScoped<IProductsService, ProductsService>();
+
 // Add logging
 builder.Services.AddLogging();
 
@@ -28,12 +32,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// Only use HTTPS redirection in production
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
-
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();

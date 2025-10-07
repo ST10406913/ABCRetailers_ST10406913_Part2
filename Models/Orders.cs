@@ -16,14 +16,14 @@ namespace ABCRetailers.Models
         public ETag ETag { get; set; }
 
         [Required(ErrorMessage = "Customer ID is required")]
-        public required string CustomerId { get; set; }
+        public string CustomerId { get; set; } = string.Empty; // Remove 'required'
 
-        public required string CustomerName { get; set; }
+        public string CustomerName { get; set; } = string.Empty; // Remove 'required'
 
         [Required(ErrorMessage = "Product ID is required")]
-        public required string ProductId { get; set; }
+        public string ProductId { get; set; } = string.Empty; // Remove 'required'
 
-        public required string ProductName { get; set; }
+        public string ProductName { get; set; } = string.Empty; // Remove 'required'
 
         [Required(ErrorMessage = "Quantity is required")]
         [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]

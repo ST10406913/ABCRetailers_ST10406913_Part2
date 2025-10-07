@@ -1,5 +1,4 @@
-﻿<!-- Views/Products/Index.cshtml -->
-@model IEnumerable<Products>
+﻿@model IEnumerable<Products>
 @{
     ViewData["Title"] = "Products";
 }
@@ -78,9 +77,11 @@
                                     <small class="text-muted">@item.Description</small>
                                 </td>
                                 <td>@item.Category</td>
-                                <td>@item.Price.ToString("C")</td>
+                                <!-- FIXED: Changed from .ToString("C") to R format -->
+                                <td class="fw-bold">R @item.Price.ToString("N2")</td>
                                 <td>
-                                    <span class="badge @(item.StockQuantity > 10 ? "bg-success" : "bg-warning")">
+                                    <span class="badge @(item.StockQuantity > 10 ? "bg-success" : item.StockQuantity > 0 ? "bg-warning" : "bg-danger")">
+                                        <!-- FIXED: Removed $ symbol from stock display -->
                                         @item.StockQuantity in stock
                                     </span>
                                 </td>

@@ -17,20 +17,21 @@ namespace ABCRetailers.Models
 
         [Required(ErrorMessage = "First name is required")]
         [StringLength(50, ErrorMessage = "First name cannot exceed 50 characters")]
-        public required string FirstName { get; set; }
+        public string FirstName { get; set; } = string.Empty; // Remove 'required'
 
         [Required(ErrorMessage = "Last name is required")]
         [StringLength(50, ErrorMessage = "Last name cannot exceed 50 characters")]
-        public required string LastName { get; set; }
+        public string LastName { get; set; } = string.Empty; // Remove 'required'
 
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "Invalid email address")]
-        public required string Email { get; set; }
+        public string Email { get; set; } = string.Empty; // Remove 'required'
 
         [Phone(ErrorMessage = "Invalid phone number")]
-        public required string Phone { get; set; }
+        public string Phone { get; set; } = string.Empty; // Remove 'required'
 
-        public required string Address { get; set; }
+        public string Address { get; set; } = string.Empty; // Remove 'required'
+
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     }
 }

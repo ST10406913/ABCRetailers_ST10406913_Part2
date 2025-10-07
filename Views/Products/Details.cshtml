@@ -1,5 +1,4 @@
-﻿<!-- Views/Products/Details.cshtml -->
-@model ABCRetailers.Models.Products
+﻿@model Products
 @{
     ViewData["Title"] = "Product Details";
 }
@@ -8,69 +7,110 @@
     <div class="col-md-8 mx-auto">
         <div class="card">
             <div class="card-header">
-                <h4 class="mb-0"><i class="fas fa-box me-2"></i>@ViewData["Title"]</h4>
+                <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>@ViewData["Title"]</h4>
             </div>
             <div class="card-body">
-                <!-- Simple layout without any complex logic -->
                 <div class="row">
-                    <div class="col-md-4 text-center mb-4">
+                    <!-- Product Image -->
+                    <div class="col-md-6 text-center">
                         @if (!string.IsNullOrEmpty(Model.ImageUrl))
                         {
-                            <img src="@Model.ImageUrl" class="product-detail-image" alt="@Model.Name">
+                            <img src="@Model.ImageUrl" class="img-fluid rounded" style="max-height: 300px;" alt="@Model.Name" />
                         }
                         else
                         {
-                            <div class="text-muted">
-                                <i class="fas fa-image fa-3x mb-2"></i>
-                                <div>No Image</div>
+                            <div class="text-muted py-5">
+                                <i class="fas fa-image fa-4x mb-3"></i>
+                                <p>No image available</p>
                             </div>
                         }
                     </div>
-                    <div class="col-md-8">
-                        <dl class="row">
-                            <dt class="col-sm-4">Product Name</dt>
-                            <dd class="col-sm-8 fw-bold fs-5">@Model.Name</dd>
 
-                            <dt class="col-sm-4">Description</dt>
-                            <dd class="col-sm-8">@Model.Description</dd>
+                    <!-- Product Details -->
+                    <div class="col-md-6">
+                        <h3 class="text-primary">@Model.Name</h3>
+                        <p class="text-muted">@Model.Description</p>
 
-                            <dt class="col-sm-4">Category</dt>
-                            <dd class="col-sm-8">
-                                <span class="badge bg-primary">@Model.Category</span>
-                            </dd>
+                        <div class="mb-3">
+                            <strong>Category:</strong>
+                            <span class="badge bg-secondary">@Model.Category</span>
+                        </div>
 
-                            <dt class="col-sm-4">Price</dt>
-                            <dd class="col-sm-8 fs-5 text-success">@Model.Price.ToString("C")</dd>
+                        <div class="mb-3">
+                            <strong>Price:</strong>
+                            <h4 class="text-success">R @Model.Price.ToString("N2")</h4>
+                        </div>
 
-                            <dt class="col-sm-4">Stock Quantity</dt>
-                            <dd class="col-sm-8">
-                                @{
-                                    var badgeClass = Model.StockQuantity > 10 ? "bg-success" : "bg-warning";
-                                }
-                                <span class="badge @badgeClass fs-6">
-                                    @Model.StockQuantity units
-                                </span>
-                            </dd>
+                        <div class="mb-3">
+                            <strong>Stock Quantity:</strong>
+                            <span class="badge @(Model.StockQuantity > 10 ? "bg-success" : Model.StockQuantity > 0 ? "bg-warning" : "bg-danger")">
+                                @Model.StockQuantity in stock
+                            </span>
+                        </div>
 
-                            <dt class="col-sm-4">Created Date</dt>
-                            <dd class="col-sm-8">@Model.CreatedDate.ToString("MMMM dd, yyyy")</dd>
+                        <div class="mb-3">
+                            <strong>Product ID:</strong>
+                            <code>@Model.RowKey</code>
+                        </div>
 
-                            <dt class="col-sm-4">Product ID</dt>
-                            <dd class="col-sm-8"><code>@Model.RowKey</code></dd>
-                        </dl>
+                        <div class="mb-3">
+                            <strong>Created Date:</strong>
+                            <span>@Model.CreatedDate.ToString("MMMM dd, yyyy")</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                    <a asp-action="Index" class="btn btn-secondary me-md-2">
-                        <i class="fas fa-arrow-left"></i> Back to List
-                    </a>
-                    <a asp-action="Edit" asp-route-partitionKey="@Model.PartitionKey" asp-route-rowKey="@Model.RowKey" class="btn btn-warning me-md-2">
-                        <i class="fas fa-edit"></i> Edit
-                    </a>
-                    <a asp-action="Delete" asp-route-partitionKey="@Model.PartitionKey" asp-route-rowKey="@Model.RowKey" class="btn btn-danger">
-                        <i class="fas fa-trash"></i> Delete
-                    </a>
+                <!-- Action Buttons -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-action="Index" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-arrow-left"></i> Back to List
+                            </a>
+                            <a asp-action="Edit" asp-route-partitionKey="@Model.PartitionKey" asp-route-rowKey="@Model.RowKey"
+                               class="btn btn-warning me-md-2">
+                                <i class="fas fa-edit"></i> Edit Product
+                            </a>
+                            <a asp-action="Delete" asp-route-partitionKey="@Model.PartitionKey" asp-route-rowKey="@Model.RowKey"
+                               class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Related Products Section (Optional) -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <a asp-controller="Orders" asp-action="Create" class="btn btn-outline-primary w-100 h-100 py-3">
+                            <i class="fas fa-cart-plus fa-2x mb-2"></i><br>
+                            Create Order
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a asp-action="Edit" asp-route-partitionKey="@Model.PartitionKey" asp-route-rowKey="@Model.RowKey"
+                           class="btn btn-outline-success w-100 h-100 py-3">
+                            <i class="fas fa-edit fa-2x mb-2"></i><br>
+                            Edit Product
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a asp-action="Index" class="btn btn-outline-info w-100 h-100 py-3">
+                            <i class="fas fa-list fa-2x mb-2"></i><br>
+                            View All Products
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -78,11 +118,21 @@
 </div>
 
 <style>
-    .product-detail-image {
-        width: 200px;
-        height: 200px;
-        object-fit: cover;
-        border-radius: 8px;
-        border: 2px solid #dee2e6;
+    .card {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        border: none;
+        border-radius: 0.5rem;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 0.5rem 0.5rem 0 0 !important;
+        padding: 1.25rem;
+    }
+
+    .badge {
+        font-size: 0.9em;
+        padding: 0.5em 0.75em;
     }
 </style>

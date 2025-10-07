@@ -1,5 +1,4 @@
-﻿// Controllers/HomeController.cs
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using ABCRetailers.Models;
 using ABCRetailers.Services.Interfaces;
@@ -32,15 +31,15 @@ namespace ABCRetailers.Controllers
             {
                 var dashboard = new HomeViewModel();
 
-                // Get counts for dashboard cards
-                var customers = await _customerService.GetAllEntitiesAsync("Customers");
-                var products = await _productService.GetAllEntitiesAsync("Products");
-                var orders = await _orderService.GetAllEntitiesAsync("Orders");
+                // FIXED: Remove partition key parameters - get ALL entities
+                var customers = await _customerService.GetAllEntitiesAsync() ?? new List<Customers>();
+                var products = await _productService.GetAllEntitiesAsync() ?? new List<Products>();
+                var orders = await _orderService.GetAllEntitiesAsync() ?? new List<Orders>();
 
                 dashboard.TotalCustomers = customers.Count();
                 dashboard.TotalProducts = products.Count();
                 dashboard.TotalOrders = orders.Count();
-                dashboard.TotalRevenue = orders.Sum(o => o.TotalPrice);
+                dashboard.TotalRevenue = orders.Any() ? orders.Sum(o => o.TotalPrice) : 0;
 
                 // Get recent orders for the table
                 dashboard.RecentOrders = orders
@@ -49,16 +48,18 @@ namespace ABCRetailers.Controllers
                     .ToList();
 
                 // Get order status distribution
-                dashboard.OrderStatusCounts = orders
-                    .GroupBy(o => o.Status)
-                    .ToDictionary(g => g.Key, g => g.Count());
+                dashboard.OrderStatusCounts = orders.Any()
+                    ? orders.GroupBy(o => o.Status)
+                           .ToDictionary(g => g.Key, g => g.Count())
+                    : new Dictionary<string, int>();
 
                 // Get low stock products
-                dashboard.LowStockProducts = products
-                    .Where(p => p.StockQuantity < 10)
-                    .OrderBy(p => p.StockQuantity)
-                    .Take(5)
-                    .ToList();
+                dashboard.LowStockProducts = products.Any()
+                    ? products.Where(p => p.StockQuantity < 10)
+                             .OrderBy(p => p.StockQuantity)
+                             .Take(5)
+                             .ToList()
+                    : new List<Products>();
 
                 return View(dashboard);
             }

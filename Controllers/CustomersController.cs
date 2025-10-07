@@ -1,5 +1,4 @@
-﻿// Controllers/CustomersController.cs
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using ABCRetailers.Models;
 using ABCRetailers.Services.Interfaces;
@@ -28,12 +27,12 @@ namespace ABCRetailers.Controllers
 
                 if (!string.IsNullOrEmpty(searchString))
                 {
-                    customers = await _customerService.SearchEntitiesAsync(searchString, "Customer");
+                    customers = await _customerService.SearchEntitiesAsync(searchString);
                     ViewData["SearchResults"] = $"{customers.Count()} customers found for \"{searchString}\"";
                 }
                 else
                 {
-                    customers = await _customerService.GetAllEntitiesAsync("Customer");
+                    customers = await _customerService.GetAllEntitiesAsync();
                 }
 
                 return View(customers);
@@ -87,6 +86,7 @@ namespace ABCRetailers.Controllers
             {
                 if (ModelState.IsValid)
                 {
+                    // CORRECT: Already using "Customer" (singular)
                     customer.PartitionKey = "Customer";
                     customer.RowKey = Guid.NewGuid().ToString();
 

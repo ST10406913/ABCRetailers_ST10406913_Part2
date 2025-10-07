@@ -1,5 +1,4 @@
-﻿<!-- Views/Orders/Create.cshtml -->
-@model ABCRetailers.ViewModels.OrderCreateViewModel
+﻿@model ABCRetailers.ViewModels.OrderCreateViewModel
 @{
     ViewData["Title"] = "Create Order";
 }
@@ -14,26 +13,20 @@
                 <form asp-action="Create">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
+                    <!-- FIXED: Using CustomerOptions with asp-items -->
                     <div class="form-group mb-3">
-                        <label asp-for="CustomerId" class="form-label"></label>
-                        <select asp-for="CustomerId" class="form-select">
+                        <label asp-for="CustomerId" class="form-label">Customer</label>
+                        <select asp-for="CustomerId" asp-items="Model.CustomerOptions" class="form-select">
                             <option value="">-- Select Customer --</option>
-                            @foreach (var customer in Model.Customers)
-                            {
-                                <option value="@customer.RowKey">@customer.FirstName @customer.LastName</option>
-                            }
                         </select>
                         <span asp-validation-for="CustomerId" class="text-danger"></span>
                     </div>
 
+                    <!-- FIXED: Using ProductOptions with asp-items -->
                     <div class="form-group mb-3">
-                        <label asp-for="ProductId" class="form-label"></label>
-                        <select asp-for="ProductId" class="form-select">
+                        <label asp-for="ProductId" class="form-label">Product</label>
+                        <select asp-for="ProductId" asp-items="Model.ProductOptions" class="form-select">
                             <option value="">-- Select Product --</option>
-                            @foreach (var product in Model.Products)
-                            {
-                                <option value="@product.RowKey">@product.Name - @product.Price.ToString("C")</option>
-                            }
                         </select>
                         <span asp-validation-for="ProductId" class="text-danger"></span>
                     </div>
@@ -41,14 +34,14 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-3">
-                                <label asp-for="Quantity" class="form-label"></label>
-                                <input asp-for="Quantity" class="form-control" type="number" min="1" />
+                                <label asp-for="Quantity" class="form-label">Quantity</label>
+                                <input asp-for="Quantity" class="form-control" type="number" min="1" value="1" />
                                 <span asp-validation-for="Quantity" class="text-danger"></span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-3">
-                                <label asp-for="OrderDate" class="form-label"></label>
+                                <label asp-for="OrderDate" class="form-label">Order Date</label>
                                 <input asp-for="OrderDate" class="form-control" type="date" />
                                 <span asp-validation-for="OrderDate" class="text-danger"></span>
                             </div>
@@ -56,9 +49,10 @@
                     </div>
 
                     <div class="form-group mb-4">
-                        <label asp-for="Status" class="form-label"></label>
+                        <label asp-for="Status" class="form-label">Status</label>
                         <select asp-for="Status" class="form-select">
                             <option value="Submitted">Submitted</option>
+                            <option value="Pending">Pending</option>
                             <option value="Confirmed">Confirmed</option>
                             <option value="Shipped">Shipped</option>
                             <option value="Delivered">Delivered</option>

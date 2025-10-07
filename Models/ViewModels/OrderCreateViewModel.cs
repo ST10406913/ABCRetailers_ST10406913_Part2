@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using ABCRetailers.Models;
 
 namespace ABCRetailers.ViewModels
@@ -16,7 +17,7 @@ namespace ABCRetailers.ViewModels
         [Required]
         [Display(Name = "Quantity")]
         [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]
-        public int Quantity { get; set; }
+        public int Quantity { get; set; } = 1;
 
         [Required]
         [Display(Name = "Order Date")]
@@ -27,7 +28,8 @@ namespace ABCRetailers.ViewModels
         [Display(Name = "Status")]
         public string Status { get; set; } = "Submitted";
 
-        public List<Customers> Customers { get; set; } = new List<Customers>();
-        public List<Products> Products { get; set; } = new List<Products>();
+        // FIXED: Use SelectListItem for dropdowns
+        public List<SelectListItem> CustomerOptions { get; set; } = new List<SelectListItem>();
+        public List<SelectListItem> ProductOptions { get; set; } = new List<SelectListItem>();
     }
 }

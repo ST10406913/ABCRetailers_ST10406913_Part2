@@ -1,9 +1,9 @@
-﻿// Services/Implementations/TableStorageService.cs
+﻿using ABCRetailers.Models;
+using ABCRetailers.Services.Interfaces;
+using Azure;
 using Azure.Data.Tables;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using ABCRetailers.Models;
-using ABCRetailers.Services.Interfaces;
 
 namespace ABCRetailers.Services.Implementations
 {
@@ -145,7 +145,10 @@ namespace ABCRetailers.Services.Implementations
                 }
 
                 var tableClient = _tableServiceClient.GetTableClient(GetTableName());
-                var response = await tableClient.UpdateEntityAsync(entity, entity.ETag);
+
+                // FIXED: Use ETag.All to force update regardless of ETag
+                var response = await tableClient.UpdateEntityAsync(entity, ETag.All, TableUpdateMode.Replace);
+
                 _logger.LogInformation("Entity updated successfully - PartitionKey: {PartitionKey}, RowKey: {RowKey}",
                     entity.PartitionKey, entity.RowKey);
                 return !response.IsError;
@@ -189,9 +192,6 @@ namespace ABCRetailers.Services.Implementations
                 {
                     return await GetAllEntitiesAsync(partitionKey);
                 }
-
-                var tableClient = _tableServiceClient.GetTableClient(GetTableName());
-                var entities = new List<T>();
 
                 var allEntities = await GetAllEntitiesAsync(partitionKey);
                 return allEntities.Where(entity =>

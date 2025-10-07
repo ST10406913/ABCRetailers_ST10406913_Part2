@@ -1,5 +1,5 @@
-﻿// Controllers/OrdersController.cs
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Options;
 using ABCRetailers.Models;
 using ABCRetailers.Services.Interfaces;
@@ -44,12 +44,12 @@ namespace ABCRetailers.Controllers
 
                 if (!string.IsNullOrEmpty(searchString))
                 {
-                    orders = await _orderService.SearchEntitiesAsync(searchString, "Orders");
+                    orders = await _orderService.SearchEntitiesAsync(searchString);
                     ViewData["SearchResults"] = $"{orders.Count()} orders found for \"{searchString}\"";
                 }
                 else
                 {
-                    orders = await _orderService.GetAllEntitiesAsync("Orders");
+                    orders = await _orderService.GetAllEntitiesAsync();
                 }
 
                 // Apply status filter if selected
@@ -76,13 +76,24 @@ namespace ABCRetailers.Controllers
         {
             try
             {
-                var customers = await _customerService.GetAllEntitiesAsync("Customers");
-                var products = await _productService.GetAllEntitiesAsync("Products");
+                // FIXED: Get all entities without partition key
+                var customers = await _customerService.GetAllEntitiesAsync() ?? new List<Customers>();
+                var products = await _productService.GetAllEntitiesAsync() ?? new List<Products>();
 
                 var viewModel = new OrderCreateViewModel
                 {
-                    Customers = customers.ToList(),
-                    Products = products.ToList()
+                    // FIXED: Convert to SelectListItem with proper display text
+                    CustomerOptions = customers.Select(c => new SelectListItem
+                    {
+                        Value = c.RowKey,
+                        Text = $"{c.FirstName} {c.LastName} - {c.Email}"
+                    }).ToList(),
+
+                    ProductOptions = products.Select(p => new SelectListItem
+                    {
+                        Value = p.RowKey,
+                        Text = $"{p.Name} - R{p.Price:0.00}"
+                    }).ToList()
                 };
 
                 return View(viewModel);
@@ -105,8 +116,8 @@ namespace ABCRetailers.Controllers
                 if (ModelState.IsValid)
                 {
                     // Get customer and product details
-                    var customer = await _customerService.GetEntityAsync("Customers", viewModel.CustomerId);
-                    var product = await _productService.GetEntityAsync("Products", viewModel.ProductId);
+                    var customer = await _customerService.GetEntityAsync("Customer", viewModel.CustomerId);
+                    var product = await _productService.GetEntityAsync("Product", viewModel.ProductId);
 
                     if (customer == null || product == null)
                     {
@@ -123,7 +134,7 @@ namespace ABCRetailers.Controllers
                     // Create order
                     var order = new Orders
                     {
-                        PartitionKey = "Orders",
+                        PartitionKey = "Order",
                         RowKey = Guid.NewGuid().ToString(),
                         CustomerId = viewModel.CustomerId,
                         ProductId = viewModel.ProductId,
@@ -159,11 +170,21 @@ namespace ABCRetailers.Controllers
                     }
                 }
 
-                // Reload dropdown data if validation fails
-                var customers = await _customerService.GetAllEntitiesAsync("Customers");
-                var products = await _productService.GetAllEntitiesAsync("Products");
-                viewModel.Customers = customers.ToList();
-                viewModel.Products = products.ToList();
+                // FIXED: Reload dropdown data properly if validation fails
+                var customers = await _customerService.GetAllEntitiesAsync() ?? new List<Customers>();
+                var products = await _productService.GetAllEntitiesAsync() ?? new List<Products>();
+
+                viewModel.CustomerOptions = customers.Select(c => new SelectListItem
+                {
+                    Value = c.RowKey,
+                    Text = $"{c.FirstName} {c.LastName} - {c.Email}"
+                }).ToList();
+
+                viewModel.ProductOptions = products.Select(p => new SelectListItem
+                {
+                    Value = p.RowKey,
+                    Text = $"{p.Name} - R{p.Price:0.00}"
+                }).ToList();
 
                 return View(viewModel);
             }
@@ -259,7 +280,7 @@ namespace ABCRetailers.Controllers
                     return Json(new { results = new List<object>() });
                 }
 
-                var orders = await _orderService.SearchEntitiesAsync(term, "Orders");
+                var orders = await _orderService.SearchEntitiesAsync(term);
                 var results = orders.Select(o => new
                 {
                     id = o.RowKey,
