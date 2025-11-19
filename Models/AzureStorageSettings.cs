@@ -14,6 +14,7 @@
         public string Customers { get; set; } = "Customers";
         public string Products { get; set; } = "Products";
         public string Orders { get; set; } = "Orders";
+        public string Cart { get; set; } = "Cart"; // ADDED FOR PART 3
     }
 
     public class BlobContainerNames

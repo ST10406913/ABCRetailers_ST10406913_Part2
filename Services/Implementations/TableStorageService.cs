@@ -54,6 +54,7 @@ namespace ABCRetailers.Services.Implementations
                 nameof(Customers) => _settings.TableNames.Customers,
                 nameof(Products) => _settings.TableNames.Products,
                 nameof(Orders) => _settings.TableNames.Orders,
+                nameof(Cart) => _settings.TableNames.Cart, // ADDED CART SUPPORT
                 _ => typeof(T).Name.ToLower() + "s"
             };
         }

@@ -1,0 +1,133 @@
+﻿@model ABCRetailers.Models.ViewModels.CartViewModel
+
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="breadcrumb-item"><a asp-controller="Cart" asp-action="Index">Cart</a></li>
+                    <li class="breadcrumb-item active">Checkout</li>
+                </ol>
+            </nav>
+
+            <h2><i class="fas fa-shopping-bag"></i> Checkout</h2>
+            <p class="text-muted mb-4">Review your order before placing it</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-list"></i> Order Summary</h4>
+                </div>
+                <div class="card-body">
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="row align-items-center border-bottom pb-3 mb-3">
+                            <div class="col-2">
+                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                {
+                                    <img src="@item.ImageUrl" alt="@item.ProductName"
+                                         class="img-thumbnail"
+                                         style="width: 80px; height: 80px; object-fit: cover;">
+                                }
+                                else
+                                {
+                                    <div class="bg-light d-flex align-items-center justify-content-center"
+                                         style="width: 80px; height: 80px;">
+                                        <i class="fas fa-image text-muted"></i>
+                                    </div>
+                                }
+                            </div>
+                            <div class="col-6">
+                                <h6 class="mb-1">@item.ProductName</h6>
+                                <small class="text-muted">Product ID: @item.ProductId</small>
+                            </div>
+                            <div class="col-2 text-center">
+                                <span class="text-muted">Qty: @item.Quantity</span>
+                            </div>
+                            <div class="col-2 text-end">
+                                <strong>R @item.TotalPrice.ToString("0.00")</strong>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-truck"></i> Shipping Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Standard Shipping:</strong> Free shipping on all orders. Orders are processed within 1-2 business days.
+                    </div>
+                    <p class="mb-0">
+                        <strong>Shipping Address:</strong><br>
+                        Your account shipping address will be used for delivery.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-receipt"></i> Order Total</h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Items (@Model.TotalItems):</span>
+                        <span>R @Model.GrandTotal.ToString("0.00")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Shipping:</span>
+                        <span class="text-success">FREE</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tax:</span>
+                        <span>R 0.00</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong class="fs-5">Total:</strong>
+                        <strong class="fs-5 text-success">R @Model.GrandTotal.ToString("0.00")</strong>
+                    </div>
+
+                    <form asp-action="PlaceOrder" method="post" id="placeOrderForm">
+                        <button type="submit" class="btn btn-success btn-lg w-100 mb-3">
+                            <i class="fas fa-lock"></i> Place Order Securely
+                        </button>
+                    </form>
+
+                    <div class="alert alert-warning small">
+                        <i class="fas fa-shield-alt"></i>
+                        <strong>Secure checkout:</strong> Your payment information is safe and secure.
+                    </div>
+
+                    <a href="@Url.Action("Index", "Cart")" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-arrow-left"></i> Back to Cart
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Confirm order placement
+        document.getElementById('placeOrderForm').addEventListener('submit', function(e) {
+            if (!confirm('Are you sure you want to place this order?')) {
+                e.preventDefault();
+            }
+        });
+    </script>
+}
