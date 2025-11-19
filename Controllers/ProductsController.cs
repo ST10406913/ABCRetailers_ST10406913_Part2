@@ -2,26 +2,30 @@
 using Microsoft.Extensions.Options;
 using ABCRetailers.Models;
 using ABCRetailers.Services.Interfaces;
+using System.Net.Http; // Added for HttpClient
 
 namespace ABCRetailers.Controllers
 {
     public class ProductsController : Controller
     {
         private readonly ITableStorageService<Products> _productService;
-        private readonly IBlobStorageService _blobService;
+        private readonly IBlobStorageService _blobService; // Still used for read operations if needed
         private readonly ILogger<ProductsController> _logger;
         private readonly AzureStorageSettings _settings;
+        private readonly HttpClient _httpClient; // Best practice: Inject HttpClient
 
         public ProductsController(
             ITableStorageService<Products> productService,
             IBlobStorageService blobService,
             IOptions<AzureStorageSettings> options,
-            ILogger<ProductsController> logger)
+            ILogger<ProductsController> logger,
+            IHttpClientFactory httpClientFactory) // Inject Factory
         {
             _productService = productService;
             _blobService = blobService;
             _logger = logger;
             _settings = options.Value;
+            _httpClient = httpClientFactory.CreateClient(); // Create client
         }
 
         // GET: Products with search functionality
@@ -108,11 +112,32 @@ namespace ABCRetailers.Controllers
                     product.RowKey = Guid.NewGuid().ToString();
                     product.CreatedDate = DateTime.UtcNow;
 
-                    // Handle image upload
+                    // Handle image upload via Azure Function
                     if (imageFile != null && imageFile.Length > 0)
                     {
-                        var imageUrl = await _blobService.UploadFileAsync(imageFile, _settings.BlobContainerNames.ProductImages);
-                        product.ImageUrl = imageUrl;
+                        // Upload via Function
+                        using (var content = new MultipartFormDataContent())
+                        {
+                            content.Add(new StreamContent(imageFile.OpenReadStream()), "file", imageFile.FileName);
+                            
+                            // Function URL (Ensure port 7071 is correct from your console)
+                            var response = await _httpClient.PostAsync("http://localhost:7071/api/UploadBlob", content);
+                            
+                            if (response.IsSuccessStatusCode)
+                            {
+                                // Construct the URL manually since the function just uploads it
+                                // Format: https://[account].blob.core.windows.net/[container]/[filename]
+                                // You might want to make the Function return the URL string to be safer
+                                product.ImageUrl = $"https://{_settings.StorageAccountName}.blob.core.windows.net/{_settings.BlobContainerNames.ProductImages}/{imageFile.FileName}";
+                            }
+                            else
+                            {
+                                _logger.LogWarning("Function upload failed: " + response.ReasonPhrase);
+                                // Fallback: Use local service if function fails (optional)
+                                var imageUrl = await _blobService.UploadFileAsync(imageFile, _settings.BlobContainerNames.ProductImages);
+                                product.ImageUrl = imageUrl;
+                            }
+                        }
                     }
 
                     var success = await _productService.AddEntityAsync(product);
@@ -162,17 +187,15 @@ namespace ABCRetailers.Controllers
             }
         }
 
-        // POST: Products/Edit/5 - FIXED VERSION
+        // POST: Products/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string partitionKey, string rowKey, Products product, IFormFile imageFile)
         {
             try
             {
-                // FIXED: Remove the partitionKey/rowKey check that was causing issues
                 if (ModelState.IsValid)
                 {
-                    // Get the existing product to preserve some fields
                     var existingProduct = await _productService.GetEntityAsync(product.PartitionKey, product.RowKey);
                     if (existingProduct == null)
                     {
@@ -180,18 +203,32 @@ namespace ABCRetailers.Controllers
                         return RedirectToAction(nameof(Index));
                     }
 
-                    // Preserve the created date
                     product.CreatedDate = existingProduct.CreatedDate;
 
-                    // Handle image upload if new file provided
+                    // Handle image upload
                     if (imageFile != null && imageFile.Length > 0)
                     {
-                        var imageUrl = await _blobService.UploadFileAsync(imageFile, _settings.BlobContainerNames.ProductImages);
-                        product.ImageUrl = imageUrl;
+                         // Upload via Function
+                        using (var content = new MultipartFormDataContent())
+                        {
+                            content.Add(new StreamContent(imageFile.OpenReadStream()), "file", imageFile.FileName);
+                            
+                            var response = await _httpClient.PostAsync("http://localhost:7071/api/UploadBlob", content);
+                            
+                            if (response.IsSuccessStatusCode)
+                            {
+                                product.ImageUrl = $"https://{_settings.StorageAccountName}.blob.core.windows.net/{_settings.BlobContainerNames.ProductImages}/{imageFile.FileName}";
+                            }
+                            else 
+                            {
+                                 // Fallback
+                                 var imageUrl = await _blobService.UploadFileAsync(imageFile, _settings.BlobContainerNames.ProductImages);
+                                 product.ImageUrl = imageUrl;
+                            }
+                        }
                     }
                     else
                     {
-                        // Keep existing image if no new file uploaded
                         product.ImageUrl = existingProduct.ImageUrl;
                     }
 
@@ -207,7 +244,6 @@ namespace ABCRetailers.Controllers
                     }
                 }
 
-                // If we got this far, something failed; redisplay form
                 return View(product);
             }
             catch (Exception ex)

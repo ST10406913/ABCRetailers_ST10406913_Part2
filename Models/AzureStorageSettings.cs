@@ -2,6 +2,8 @@
 {
     public class AzureStorageSettings
     {
+        internal object? StorageAccountName;
+
         public required string ConnectionString { get; set; }
         public required TableNames TableNames { get; set; }
         public required BlobContainerNames BlobContainerNames { get; set; }
